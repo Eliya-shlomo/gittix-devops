@@ -14,7 +14,9 @@ spec:
     spec:
       containers:
         - name: payments
-          image: matanlevi201/payments
+          image: eliyashlomo7/payments-service
+          ports:
+            - containerPort: 3000
           env:
             - name: QUEUE_CLIENT_ID
               valueFrom:
@@ -41,6 +43,13 @@ spec:
                 secretKeyRef:
                   name: public-stripe-secret
                   key: PUB_STRIPE_KEY
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "250m"
 ---
 apiVersion: v1
 kind: Service
@@ -54,3 +63,4 @@ spec:
       protocol: TCP
       port: 3000
       targetPort: 3000
+  type: ClusterIP

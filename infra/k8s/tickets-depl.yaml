@@ -2,6 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tickets-depl
+  labels:
+    app: tickets
 spec:
   replicas: 1
   selector:
@@ -14,7 +16,9 @@ spec:
     spec:
       containers:
         - name: tickets
-          image: matanlevi201/tickets
+          image: eliyashlomo7/tickets-service
+          ports:
+            - containerPort: 3000
           env:
             - name: QUEUE_CLIENT_ID
               valueFrom:
@@ -31,6 +35,13 @@ spec:
                 secretKeyRef:
                   name: jwt-secret
                   key: JWT_KEY
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "250m"
 ---
 apiVersion: v1
 kind: Service
@@ -40,7 +51,8 @@ spec:
   selector:
     app: tickets
   ports:
-    - name: tickets
+    - name: http
       protocol: TCP
       port: 3000
       targetPort: 3000
+  type: ClusterIP

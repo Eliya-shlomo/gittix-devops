@@ -17,28 +17,38 @@ spec:
           image: nats-streaming:0.25.6
           args:
             [
-              "-p",
-              "4222",
-              "-m",
-              "8222",
-              "-hbi",
-              "5s",
-              "-hbt",
-              "5s",
-              "-hbf",
-              "2",
+              "-p", "4222",
+              "-m", "8222",
+              "-hbi", "5s",
+              "-hbt", "5s",
+              "-hbf", "2",
               "-SD",
-              "-cid",
-              "ticket",
+              "-cid", "ticket"
             ]
-          # hbi, 5s:
-          #   - heartbeat check every 5 seconds
-          # hbt, 5s:
-          #   - heartbeat response every 5 seconds
-          # hbf, 2:
-          #   - max fails of 2 before unregister a client
-          # cid:
-          #   - cluster id
+          ports:
+            - containerPort: 4222
+              name: client
+            - containerPort: 8222
+              name: monitoring
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8222
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8222
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
 ---
 apiVersion: v1
 kind: Service
@@ -52,7 +62,7 @@ spec:
       protocol: TCP
       port: 4222
       targetPort: 4222
-    - name: monitoting
+    - name: monitoring
       protocol: TCP
       port: 8222
       targetPort: 8222

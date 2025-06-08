@@ -2,19 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: expiration-depl
-spec:
+spec: 
   replicas: 1
-  selector:
+  selector: 
     matchLabels:
       app: expiration
   template:
     metadata:
       labels:
         app: expiration
-    spec:
+    spec: 
       containers:
         - name: expiration
-          image: matanlevi201/expiration
+          image: eliyashlomo7/expiration-service
           env:
             - name: QUEUE_CLIENT_ID
               valueFrom:
@@ -26,3 +26,51 @@ spec:
               value: ticket
             - name: REDIS_HOST
               value: expiration-redis-srv
+          resources: 
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits: 
+              memory: "128Mi"
+              cpu: "250m"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: expiration-redis-depl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: expiration-redis
+  template:
+    metadata:
+      labels:
+        app: expiration-redis
+    spec:
+      containers:
+        - name: expiration-redis
+          image: redis:7.2-alpine
+          ports:
+            - containerPort: 6379
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "250m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: expiration-redis-srv
+spec:
+  selector:
+    app: expiration-redis
+  ports:
+    - name: redis
+      protocol: TCP
+      port: 6379
+      targetPort: 6379
+  type: ClusterIP
